@@ -28,8 +28,8 @@ jobs:
       - run: rustup target add wasm32-unknown-unknown
       - run: cargo version
 
-      # Set up tag.
-      - name: Set tag name
+      # 3️⃣ Set up env vars that will be used in the workflow.
+      - name: Set up env vars
         run: |
           if [ -n "${{ github.event.inputs.release_name }}" ]; then
             echo "TAG_NAME=${{ github.event.inputs.release_name }}" >> $GITHUB_ENV
@@ -37,33 +37,39 @@ jobs:
             echo "TAG_NAME=${{ github.ref_name }}" >> $GITHUB_ENV
           fi
 
-      # 3️⃣ Set up the Stellar CLI.
+          echo "WASM_FILE="target/wasm32-unknown-unknown/release/hello.wasm" >> $GITHUB_ENV
+
+      # 4️⃣ Set up the Stellar CLI.
       - uses: stellar/stellar-cli@v22.5.0
         with:
           version: 22.5.0
 
-      # 4️⃣ Build the contract and mark the WASM with the current repository.
+      # 5️⃣ Build the contract and mark the WASM with the current repository.
       - name: Build contract
         run: |
           stellar contract build \
             --meta home_domain=example.com \
-            --meta source_repo=github:${{github.repository}}
+            --meta source_repo=github:${{ github.repository }}
 
-      # 5️⃣ Upload the WASM file to the artifacts.
+          stellar contract optimize --wasm ${{ env.WASM_FILE }}
+          file=${{ env.WASM_FILE }}
+          cp "${file%.*}.optimized.wasm" ${{ env.WASM_FILE }}
+
+      # 6️⃣ Upload the WASM file to the artifacts.
       - name: Upload to Artifacts
         uses: actions/upload-artifact@v4
         with:
           name: hello.wasm
-          path: target/wasm32-unknown-unknown/release/hello.wasm
+          path: ${{ env.WASM_FILE }}
 
-      # 6️⃣ Build the attestation for the wasm file.
+      # 7️⃣ Build the attestation for the wasm file.
       - name: Build Attestation for Release
         uses: actions/attest-build-provenance@v1
         with:
           subject-name: hello.wasm
-          subject-path: target/wasm32-unknown-unknown/release/hello.wasm
+          subject-path: ${{ env.WASM_FILE }}
 
-      # 7️⃣ Make a new release.
+      # 8️⃣ Make a new release.
       - name: Make a new Release
         id: release
         uses: actions/github-script@v7
@@ -81,7 +87,7 @@ jobs:
             const { data } = response;
             core.setOutput('release_id', data.id);
 
-      # 8️⃣ Upload the wasm file to the release.
+      # 9️⃣ Upload the wasm file to the release.
       - name: Upload to Release
         uses: actions/github-script@v7
         with:
