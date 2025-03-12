@@ -94,10 +94,11 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const fs = require('fs');
+            const path = require('path');
             await github.rest.repos.uploadReleaseAsset({
               owner: context.repo.owner,
               repo: context.repo.repo,
               release_id: '${{ steps.release.outputs.release_id }}',
-              name: 'hello.wasm',
-              data: fs.readFileSync('target/wasm32-unknown-unknown/release/hello.wasm'),
+              name: path.basename('${{ env.WASM_FILE }}'),
+              data: fs.readFileSync('${{ env.WASM_FILE }}'),
             });
