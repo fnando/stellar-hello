@@ -31,13 +31,13 @@ jobs:
       # 3️⃣ Set up env vars that will be used in the workflow.
       - name: Set up env vars
         run: |
+          echo "WASM_FILE="target/wasm32-unknown-unknown/release/hello.wasm" >> $GITHUB_ENV
+
           if [ -n "${{ github.event.inputs.release_name }}" ]; then
             echo "TAG_NAME=${{ github.event.inputs.release_name }}" >> $GITHUB_ENV
           else
             echo "TAG_NAME=${{ github.ref_name }}" >> $GITHUB_ENV
           fi
-
-          echo "WASM_FILE="target/wasm32-unknown-unknown/release/hello.wasm" >> $GITHUB_ENV
 
       # 4️⃣ Set up the Stellar CLI.
       - uses: stellar/stellar-cli@v22.5.0
