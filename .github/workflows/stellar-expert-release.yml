@@ -21,7 +21,7 @@ jobs:
       release_description: "Contract release"
       relative_path: '["contracts/hello"]'
       package: "hello"
-      make_target: "build-dependencies"
+      # make_target: "build-dependencies"
       # home_domain: "example.com" # organization's domain name (optional)
     secrets:
       release_token: ${{ secrets.GITHUB_TOKEN }}
