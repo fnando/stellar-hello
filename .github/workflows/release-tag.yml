@@ -49,9 +49,6 @@ jobs:
             --meta home_domain=example.com \
             --meta source_repo=github:${{ github.repository }}
 
-          file=${{ env.WASM_FILE }}
-          cp "${file%.*}.optimized.wasm" ${{ env.WASM_FILE }}
-
       # 6️⃣ Upload the WASM file to the artifacts.
       - name: Upload to Artifacts
         uses: actions/upload-artifact@v4
